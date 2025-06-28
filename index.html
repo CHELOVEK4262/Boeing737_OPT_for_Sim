@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Boeing OPT v0.0.1</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 100px;
+      background: #212121;
+      color: white;
+      flex-direction: column;
+      display: flex;
+      padding-top: 20px;
+    }
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 15px;
+      text-align: left;
+      width: 100%;
+      background-color: #747474;
+      margin: 2px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .sidebar button:hover {
+
+    }
+    .sidebar button.active {
+      background: #0A538D;
+    }
+    .content {
+      padding: 20px;
+      display: flex;
+      flex: 1;
+      /* убрали height 100% */
+      gap: 20px;
+      align-items: flex-start; /* чтобы высота по содержимому */
+    }
+    .tab-content {
+      display: none;
+      width: 100%;
+    }
+    .tab-content.active {
+      display: flex;
+    }
+
+    .left-panel {
+      border: 2px solid #464646;
+      border-right: none;
+      width: 30%;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: end;
+      background-color: #2A2A2A;
+    }
+    .center-panel {
+      border: 2px solid #464646;
+      border-right: none;
+      width: 30%;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background-color: #2A2A2A;
+    }
+    .right-panel {
+      border: 2px solid #464646;
+      width: 40%;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background-color: #2A2A2A;
+    }
+
+    .input-wrapper {
+      position: relative;
+      max-width: 300px;
+    }
+    .autocomplete-suggestions {
+      position: absolute;
+      background: white;
+      max-height: 150px;
+      overflow-y: auto;
+      width: 100%;
+      z-index: 1000;
+      color: black;
+    }
+    .autocomplete-suggestion {
+      padding: 8px;
+      cursor: pointer;
+    }
+    .autocomplete-suggestion:hover {
+      background: #eee;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    select, input[type="text"] {
+      width: 200px;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <button class="tab-button active" data-tab="tab1">TAKEOFF</button>
+    <button class="tab-button" data-tab="tab2">LANDING</button>
+    <button class="tab-button" data-tab="tab3">WEIGHT AND BALANCE</button>
+  </div>
+
+  <div class="content">
+    <div id="tab1" class="tab-content active">
+      <div class="left-panel">
+        <div class="input-wrapper">
+            <div style="display: flex; align-items: center; vertical-align: middle;">
+                <label for="airportInput">ARPT</label>
+                <input type="text" id="airportInput" autocomplete="off"/>
+            </div>
+          <div id="suggestions" class="autocomplete-suggestions"></div>
+        </div>
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+          <label for="runwaySelect">RWY</label>
+          <select id="runwaySelect"></select>
+        </div>
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+          <label for="intxSelect">INTX</label>
+          <select id="intxSelect">
+            <option value="NONE">NONE</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+          <label for="condSelect">COND</label>
+          <select id="condSelect">
+            <option value="DRY">DRY</option>
+            <option value="WET">WET</option>
+            <option value="STNDNG WTR">STNDNG WTR</option>
+            <option value="SLUSH/WET SNOW">SLUSH/WET SNOW</option>
+            <option value="CMPCT SNOW">CMPCT SNOW</option>
+            <option value="DRY SNOW">DRY SNOW</option>
+            <option value="GOOD">GOOD</option>
+            <option value="GOOD-MEDIUM">GOOD-MEDIUM</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="MEDIUM-POOR">MEDIUM-POOR</option>
+            <option value="POOR">POOR</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+          <label for="windInput">WIND</label>
+          <input type="text" id="windInput" />
+        </div>
+        <div class="coversionDiv">
+            <p class="noselect coversionText">
+              0 HW/0 XW KT
+            </p>
+        </div>
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+          <label for="oatInput">OAT</label>
+          <input type="text" id="oatInput" />
+        </div>
+        <div class="coversionDiv">
+  <p class="noselect coversionText" id="oatFahrenheit">
+    
+  </p>
+</div>
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+          <label for="qnhInput">QNH</label>
+          <input type="text" id="qnhInput" />
+        </div>
+        <div class="coversionDiv">
+  <p class="noselect coversionText" id="qnhInHg"></p>
+</div>
+      </div>
+
+      <div class="center-panel">
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+            
+        <select id="rtgSelect">
+            <option value="OPTIMUM">OPTIMUM</option>
+            <option value="">TO</option>
+            <option value="">TO1 (26K)</option>
+            <option value="">TO1 (24K)</option>
+            <option value="">WINDSHEAR</option>
+        </select>
+        <label for="rtgSelect">RTG</label>
+        </div>
+        
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+            
+        <select name="" id="">
+            <option value="MAX">MAX</option>
+        </select>
+        <label for="">ATM</label>
+        </div>
+
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+            
+        <select name="" id="">
+            <option value="">OPTIMUM</option>
+            <option value="">1</option>
+            <option value="">5</option>
+            <option value="">10</option>
+            <option value="">15</option>
+            <option value="">25</option>
+        </select>
+        <label for="">FLAP</label>
+        </div>
+        
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+            
+        <select name="" id="">
+            <option value="">BLEEDS ON</option>
+            <option value="">BLEEDS OFF</option>
+        </select>
+        <label for="">A/C</label>
+        </div>
+
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+            
+        <select name="" id="">
+            <option value="">OFF</option>
+            <option value="">ENGINE</option>
+            <option value="">ENG+WING</option>
+        </select>
+        <label for="">A/I</label>
+        </div>
+        
+        
+      </div>
+      <div class="right-panel">
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+            <label for="">Takeoff Weight:</label>
+            <input type="text">
+        </div>
+        <div style="display: flex; align-items: center; vertical-align: middle;">
+            <label for="">CG(%):</label>
+            <input type="text">
+        </div>
+      </div>
+    </div>
+    <div id="tab2" class="tab-content">Содержимое вкладки LANDING...</div>
+    <div id="tab3" class="tab-content">Содержимое вкладки WEIGHT AND BALANCE...</div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tab-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+
+  <!-- Подключаем PapaParse для парсинга CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <script>
+    let airports = [];
+    let runways = [];
+
+    async function loadAirports() {
+      try {
+        const res = await fetch('https://cdn.jsdelivr.net/npm/@nitro-land/airport-codes@1.0.4/airports.json');
+        airports = await res.json();
+      } catch (e) {
+        console.error("Ошибка загрузки списка аэропортов", e);
+      }
+    }
+
+    function loadRunways() {
+      return new Promise((resolve, reject) => {
+        Papa.parse('runways.csv', {
+          download: true,
+          header: true,
+          complete: results => {
+            runways = results.data;
+            resolve();
+          },
+          error: err => {
+            console.error("Ошибка загрузки runways.csv", err);
+            reject(err);
+          }
+        });
+      });
+    }
+
+    async function init() {
+      await loadAirports();
+      await loadRunways();
+
+      const input = document.getElementById('airportInput');
+      const suggestions = document.getElementById('suggestions');
+      const runwaySelect = document.getElementById('runwaySelect');
+
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        suggestions.innerHTML = '';
+        if (!q || !airports.length) return;
+
+        const matches = airports.filter(item =>
+          item.name.toLowerCase().includes(q) ||
+          (item.icao && item.icao.toLowerCase().includes(q)) ||
+          (item.iata && item.iata.toLowerCase().includes(q))
+        ).slice(0, 10);
+
+        matches.forEach(a => {
+          const div = document.createElement('div');
+          div.className = 'autocomplete-suggestion';
+          div.textContent = `${a.name} (${a.icao} / ${a.iata})`;
+          div.addEventListener('click', () => {
+            input.value = `${a.icao} / ${a.iata}`;
+            suggestions.innerHTML = '';
+            fillRunways(a.icao);
+          });
+          suggestions.appendChild(div);
+        });
+      });
+
+      document.addEventListener('click', e => {
+        if (!suggestions.contains(e.target) && e.target !== input) {
+          suggestions.innerHTML = '';
+        }
+      });
+
+      function fillRunways(airportIdent) {
+        runwaySelect.innerHTML = '';
+        if (!airportIdent) return;
+
+        const filteredRunways = runways.filter(r => r.airport_ident === airportIdent);
+
+        const runwaySet = new Set();
+        filteredRunways.forEach(r => {
+          if (r.le_ident) runwaySet.add(r.le_ident.trim());
+          if (r.he_ident) runwaySet.add(r.he_ident.trim());
+        });
+
+        if (runwaySet.size === 0) {
+          const option = document.createElement('option');
+          option.textContent = 'Нет данных о ВПП';
+          option.disabled = true;
+          runwaySelect.appendChild(option);
+          return;
+        }
+
+        runwaySet.forEach(rwy => {
+          const option = document.createElement('option');
+          option.value = rwy;
+          option.textContent = rwy;
+          runwaySelect.appendChild(option);
+        });
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const windInput = document.querySelector('#windInput');
+    const oatInput = document.querySelector('#oatInput');
+    const oatFahrenheitText = document.querySelector('#oatFahrenheit');
+
+    const qnhInput = document.querySelector('#qnhInput');
+    const qnhInHgText = document.querySelector('#qnhInHg');
+
+    function formatWithUnit(input, unit, onUpdate, customFormatter = null) {
+      input.addEventListener('blur', () => {
+        let val = input.value.trim().toUpperCase().replace(/[^0-9\-+.,]/g, '');
+        let formatted = customFormatter ? customFormatter(val) : val;
+        if (formatted !== '') {
+          input.value = `${formatted} ${unit}`;
+          if (onUpdate) onUpdate(formatted);
+        }
+      });
+
+      input.addEventListener('focus', () => {
+        input.value = input.value.replace(` ${unit}`, '');
+      });
+
+      input.addEventListener('input', () => {
+        let raw = input.value.trim().replace(` ${unit}`, '');
+        if (onUpdate) onUpdate(raw);
+      });
+    }
+
+    function celsiusToFahrenheit(celsiusStr) {
+      const val = parseFloat(celsiusStr);
+      if (!isNaN(val)) return Math.round((val * 9 / 5) + 32);
+      return '';
+    }
+
+    function updateFahrenheit(celsiusStr) {
+      const f = celsiusToFahrenheit(celsiusStr);
+      if (f !== '' && oatFahrenheitText) {
+        oatFahrenheitText.textContent = `${f} F`;
+      } else if (oatFahrenheitText) {
+        oatFahrenheitText.textContent = '';
+      }
+    }
+
+    function hPaToInHg(hPaStr) {
+      const val = parseFloat(hPaStr);
+      if (!isNaN(val)) {
+        return (val * 0.02953).toFixed(2);
+      }
+      return '';
+    }
+
+    function updateQnhInHg(hPaStr) {
+      const inHg = hPaToInHg(hPaStr);
+      if (inHg && qnhInHgText) {
+        qnhInHgText.textContent = `${inHg} IN HG`;
+      } else if (qnhInHgText) {
+        qnhInHgText.textContent = '';
+      }
+    }
+
+    function formatQNH(val) {
+      const num = parseFloat(val);
+      if (!isNaN(num)) return num.toFixed(1);
+      return '';
+    }
+
+    if (windInput) formatWithUnit(windInput, 'KT');
+    if (oatInput) formatWithUnit(oatInput, 'C', updateFahrenheit);
+    if (qnhInput) formatWithUnit(qnhInput, 'HPa', updateQnhInHg, formatQNH);
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const windInput = document.querySelector('#windInput');
+    const runwaySelect = document.querySelector('#runwaySelect');
+    const windComponentsText = document.querySelector('.coversionText');
+
+    function calculateWindComponents(windStr, runwayStr) {
+      const match = windStr.match(/^(\d{3})\/(\d{1,3})$/);
+      if (!match || !runwayStr) return '';
+
+      const windDir = parseInt(match[1], 10);
+      const windSpd = parseInt(match[2], 10);
+
+      const rwyDir = parseInt(runwayStr.slice(0, 2)) * 10;
+      let angle = Math.abs(windDir - rwyDir);
+      if (angle > 180) angle = 360 - angle;
+
+      const rad = angle * Math.PI / 180;
+      const hw = Math.round(windSpd * Math.cos(rad));
+      const xw = Math.round(windSpd * Math.sin(rad));
+
+      return `${hw} HW /${xw} XW KT`;
+    }
+
+    function updateWindText() {
+      const windVal = windInput.value.trim().toUpperCase();
+      const rwyVal = runwaySelect.value;
+      const result = calculateWindComponents(windVal, rwyVal);
+      if (windComponentsText && result) {
+        windComponentsText.textContent = result;
+      }
+    }
+
+    if (windInput) windInput.addEventListener('input', updateWindText);
+    if (runwaySelect) runwaySelect.addEventListener('change', updateWindText);
+  });
+</script>
+
+</body>
+</html>
